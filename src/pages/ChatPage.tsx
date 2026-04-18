@@ -32,7 +32,9 @@ export default function ChatPage() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
-  const [userScrolledUp, setUserScrolledUp] = useState(false);
+  const [userScrolledUp, _setUserScrolledUp] = useState(false);
+  const userScrolledUpRef = useRef(false);
+  const setUserScrolledUp = useCallback((val: boolean) => { userScrolledUpRef.current = val; _setUserScrolledUp(val); }, []);
   const [pendingFiles, setPendingFiles] = useState<FileAttachment[]>([]);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -155,7 +157,7 @@ export default function ChatPage() {
         onToken: (token) => {
           accum += token;
           store.updateMessage(convId!, assistantMsgId, { content: accum });
-          if (!userScrolledUp && settings.autoScroll) {
+          if (!userScrolledUpRef.current && settings.autoScroll) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
           }
         },
