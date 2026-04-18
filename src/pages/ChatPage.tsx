@@ -127,14 +127,14 @@ export default function ChatPage() {
     setIsStreaming(true);
     setUserScrolledUp(false);
 
-    const conv = conversations.find((c) => c.id === convId)!;
+    const conv = conversations.find((c) => c.id === convId);
 
     const allMessages = [
-      ...conv.messages.filter((m) => m.id !== assistantMsgId),
+      ...(conv ? conv.messages : []).filter((m) => m.id !== assistantMsgId),
       { role: 'user' as const, content, images: images.length > 0 ? images : undefined, id: '', createdAt: 0 },
     ];
 
-    const ollamaMessages = buildOllamaMessages(allMessages, activeConversation?.systemPrompt ?? conv.systemPrompt ?? '');
+    const ollamaMessages = buildOllamaMessages(allMessages, activeConversation?.systemPrompt ?? (conv ? conv.systemPrompt : "") ?? '');
 
     abortRef.current = new AbortController();
 
