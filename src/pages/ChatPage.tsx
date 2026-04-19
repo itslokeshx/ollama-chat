@@ -255,12 +255,18 @@ export default function ChatPage() {
             const isModelNotFound =
               err.message.includes("not found") &&
               err.message.includes("model");
+            const isUnauthorized = err.message.includes("unauthorized");
             const modelToRun = selectedModel.includes(":cloud")
               ? selectedModel
               : `${selectedModel}:cloud`;
-            const fallbackMsg = isModelNotFound
-              ? `Error: ${err.message}\n\n**This model is not downloaded locally yet.**\nTo run it, open your terminal and run:\n\`\`\`bash\nollama run ${modelToRun}\n\`\`\``
-              : `Error: ${err.message}\n\nMake sure Ollama is running with:\n\`\`\`bash\nollama serve\n\`\`\``;
+            
+            let fallbackMsg = `Error: ${err.message}\n\nMake sure Ollama is running with:\n\`\`\`bash\nollama serve\n\`\`\``;
+            
+            if (isModelNotFound) {
+              fallbackMsg = `Error: ${err.message}\n\n**This model is not downloaded locally yet.**\nTo run it, open your terminal and run:\n\`\`\`bash\nollama run ${modelToRun}\n\`\`\``;
+            } else if (isUnauthorized) {
+              fallbackMsg = `Error: ${err.message}\n\n**Cloud Authentication Failed.**\nYour Ollama session may have expired or is unauthorized to use this cloud model. Open your terminal and sign in again:\n\`\`\`bash\nollama signin\n\`\`\``;
+            }
 
             store.updateMessage(convId!, assistantMsgId, {
               content: fallbackMsg,
