@@ -12,12 +12,19 @@ import {
 } from '@/lib/model-utils';
 import { isVisionModel } from '@/lib/types';
 
-function getProviderPrefix(family: string = '') {
-  const f = family.toLowerCase().replace(/[0-9.]/g, ''); // strip numbers
+function getProviderPrefix(family: string = '', name: string = '') {
+  let f = family.toLowerCase().replace(/[0-9.]/g, ''); // strip numbers
+  
+  if (!f && name) {
+    // Infer family from model name if metadata is empty (e.g. glm-4.7:cloud -> glm)
+    f = name.split('-')[0].split(':')[0].toLowerCase().replace(/[0-9.]/g, '');
+  }
+
   const map: Record<string, string> = {
     llama: 'Meta',
     gemma: 'Google',
     qwen: 'Alibaba',
+    qwennext: 'Alibaba',
     mistral: 'Mistral',
     mixtral: 'Mistral',
     phi: 'Microsoft',
@@ -26,16 +33,28 @@ function getProviderPrefix(family: string = '') {
     minimax: 'MiniMax',
     kimi: 'Moonshot AI',
     glm: 'Zhipu AI',
-    gptoss: 'Open Weights',
+    gptoss: 'ChatGPT',
+    gpt: 'ChatGPT',
     granite: 'IBM',
     command: 'Cohere',
     starcoder: 'BigCode',
   };
   
   if (map[f]) return map[f];
-  if (!family) return 'Other';
-  return family.charAt(0).toUpperCase() + family.slice(1);
+  if (!f) return 'Other';
+  return f.charAt(0).toUpperCase() + f.slice(1);
 }
+
+const PROVIDER_ORDER = [
+  'Zhipu AI',
+  'MiniMax',
+  'Moonshot AI',
+  'Alibaba',
+  'DeepSeek',
+  'ChatGPT',
+  'Google',
+  'NVIDIA'
+];
 
 interface Props {
   models: OllamaModel[];
@@ -200,26 +219,48 @@ export function ModelSelectorPopover({
   const groupedLocal = useMemo(() => {
     const groups: Record<string, OllamaModel[]> = {};
     for (const model of filteredLocal) {
-      const provider = getProviderPrefix(model.details?.family);
+      const provider = getProviderPrefix(model.details?.family, model.name);
       if (!groups[provider]) groups[provider] = [];
       groups[provider].push(model);
     }
     return Object.entries(groups)
-      .map(([provider, models]) => ({ provider, models }))
-      .sort((a, b) => a.provider.localeCompare(b.provider));
+      .map(([provider, models]) => {
+        // Sort models descending (high to low, e.g. glm-5.1 -> glm-4.7)
+        models.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+        return { provider, models };
+      })
+      .sort((a, b) => {
+        const idxA = PROVIDER_ORDER.indexOf(a.provider);
+        const idxB = PROVIDER_ORDER.indexOf(b.provider);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.provider.localeCompare(b.provider);
+      });
   }, [filteredLocal]);
 
   // Group cloud models by provider
   const groupedCloud = useMemo(() => {
     const groups: Record<string, OllamaModel[]> = {};
     for (const model of filteredCloud) {
-      const provider = getProviderPrefix(model.details?.family);
+      const provider = getProviderPrefix(model.details?.family, model.name);
       if (!groups[provider]) groups[provider] = [];
       groups[provider].push(model);
     }
     return Object.entries(groups)
-      .map(([provider, models]) => ({ provider, models }))
-      .sort((a, b) => a.provider.localeCompare(b.provider));
+      .map(([provider, models]) => {
+        // Sort models descending (high to low)
+        models.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+        return { provider, models };
+      })
+      .sort((a, b) => {
+        const idxA = PROVIDER_ORDER.indexOf(a.provider);
+        const idxB = PROVIDER_ORDER.indexOf(b.provider);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.provider.localeCompare(b.provider);
+      });
   }, [filteredCloud]);
 
   const displayName = selectedModel.split(':')[0] || 'Select model';
