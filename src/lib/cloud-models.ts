@@ -1,33 +1,34 @@
-import { OllamaModel } from '@/lib/types';
+import type { OllamaModel } from '@/lib/types';
+import type { ModelCapability } from '@/lib/model-utils';
 
-export const CLOUD_MODELS: OllamaModel[] = [
-  { name: 'glm-5.1:cloud', model: 'glm-5.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '40b', quantization_level: '', format: '' } },
-  { name: 'gemma4:cloud', model: 'gemma4:cloud', modified_at: '', size: 0, digest: '', details: { family: 'gemma', parameter_size: '27b', quantization_level: '', format: '' } },
-  { name: 'qwen3.5:cloud', model: 'qwen3.5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '35b', quantization_level: '', format: '' } },
-  { name: 'qwen3-coder-next:cloud', model: 'qwen3-coder-next:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '32b', quantization_level: '', format: '' } },
-  { name: 'ministral-3:cloud', model: 'ministral-3:cloud', modified_at: '', size: 0, digest: '', details: { family: 'ministral', parameter_size: '8b', quantization_level: '', format: '' } },
-  { name: 'devstral-small-2:cloud', model: 'devstral-small-2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'devstral', parameter_size: '24b', quantization_level: '', format: '' } },
-  { name: 'nemotron-3-super:cloud', model: 'nemotron-3-super:cloud', modified_at: '', size: 0, digest: '', details: { family: 'nemotron', parameter_size: '120b', quantization_level: '', format: '' } },
-  { name: 'qwen3-next:cloud', model: 'qwen3-next:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '80b', quantization_level: '', format: '' } },
-  { name: 'minimax-m2.7:cloud', model: 'minimax-m2.7:cloud', modified_at: '', size: 0, digest: '', details: { family: 'minimax', parameter_size: '86b', quantization_level: '', format: '' } },
-  { name: 'kimi-k2.5:cloud', model: 'kimi-k2.5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'kimi', parameter_size: '249b', quantization_level: '', format: '' } },
-  { name: 'rnj-1:cloud', model: 'rnj-1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'rnj', parameter_size: '8b', quantization_level: '', format: '' } },
-  { name: 'glm-5:cloud', model: 'glm-5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '40b', quantization_level: '', format: '' } },
-  { name: 'nemotron-3-nano:cloud', model: 'nemotron-3-nano:cloud', modified_at: '', size: 0, digest: '', details: { family: 'nemotron', parameter_size: '4b', quantization_level: '', format: '' } },
-  { name: 'minimax-m2.5:cloud', model: 'minimax-m2.5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'minimax', parameter_size: '163b', quantization_level: '', format: '' } },
-  { name: 'devstral-2:cloud', model: 'devstral-2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'devstral', parameter_size: '123b', quantization_level: '', format: '' } },
-  { name: 'gemini-3-flash-preview:cloud', model: 'gemini-3-flash-preview:cloud', modified_at: '', size: 0, digest: '', details: { family: 'gemini', parameter_size: '135b', quantization_level: '', format: '' } },
-  { name: 'cogito-2.1:cloud', model: 'cogito-2.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'cogito', parameter_size: '671b', quantization_level: '', format: '' } },
-  { name: 'glm-4.7:cloud', model: 'glm-4.7:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '90b', quantization_level: '', format: '' } },
-  { name: 'deepseek-v3.2:cloud', model: 'deepseek-v3.2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'deepseek', parameter_size: '236b', quantization_level: '', format: '' } },
-  { name: 'minimax-m2:cloud', model: 'minimax-m2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'minimax', parameter_size: '101b', quantization_level: '', format: '' } },
-  { name: 'minimax-m2.1:cloud', model: 'minimax-m2.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'minimax', parameter_size: '39b', quantization_level: '', format: '' } },
-  { name: 'kimi-k2-thinking:cloud', model: 'kimi-k2-thinking:cloud', modified_at: '', size: 0, digest: '', details: { family: 'kimi', parameter_size: '55b', quantization_level: '', format: '' } },
-  { name: 'mistral-large-3:cloud', model: 'mistral-large-3:cloud', modified_at: '', size: 0, digest: '', details: { family: 'mistral', parameter_size: '123b', quantization_level: '', format: '' } },
-  { name: 'qwen3-vl:cloud', model: 'qwen3-vl:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '32b', quantization_level: '', format: '' } },
-  { name: 'qwen3-coder:cloud', model: 'qwen3-coder:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '30b', quantization_level: '', format: '' } },
-  { name: 'deepseek-v3.1:cloud', model: 'deepseek-v3.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'deepseek', parameter_size: '671b', quantization_level: '', format: '' } },
-  { name: 'glm-4.6:cloud', model: 'glm-4.6:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '105b', quantization_level: '', format: '' } },
-  { name: 'kimi-k2:cloud', model: 'kimi-k2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'kimi', parameter_size: '60b', quantization_level: '', format: '' } },
-  { name: 'gemma3:cloud', model: 'gemma3:cloud', modified_at: '', size: 0, digest: '', details: { family: 'gemma', parameter_size: '27b', quantization_level: '', format: '' } }
+export interface CloudModelEntry extends OllamaModel {
+  capabilities?: ModelCapability[];
+  description?: string;
+}
+
+export const CLOUD_MODELS: CloudModelEntry[] = [
+  { name: 'glm-5.1:cloud', model: 'glm-5.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '40b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Advanced reasoning model from Zhipu AI' },
+  { name: 'gemma4:cloud', model: 'gemma4:cloud', modified_at: '', size: 0, digest: '', details: { family: 'gemma', parameter_size: '27b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools', 'thinking'], description: 'Google\'s latest multimodal model' },
+  { name: 'qwen3.5:cloud', model: 'qwen3.5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '35b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools', 'thinking'], description: 'Alibaba\'s frontier reasoning model' },
+  { name: 'qwen3-coder-next:cloud', model: 'qwen3-coder-next:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '32b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Specialized coding model with advanced reasoning' },
+  { name: 'ministral-3:cloud', model: 'ministral-3:cloud', modified_at: '', size: 0, digest: '', details: { family: 'ministral', parameter_size: '8b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools'], description: 'Efficient Mistral model for fast inference' },
+  { name: 'devstral-small-2:cloud', model: 'devstral-small-2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'devstral', parameter_size: '24b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools'], description: 'Mistral\'s developer-focused model' },
+  { name: 'nemotron-3-super:cloud', model: 'nemotron-3-super:cloud', modified_at: '', size: 0, digest: '', details: { family: 'nemotron', parameter_size: '120b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'NVIDIA\'s flagship reasoning model' },
+  { name: 'qwen3-next:cloud', model: 'qwen3-next:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '80b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Next-gen Qwen with advanced capabilities' },
+  { name: 'minimax-m2.7:cloud', model: 'minimax-m2.7:cloud', modified_at: '', size: 0, digest: '', details: { family: 'minimax', parameter_size: '86b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools'], description: 'MiniMax\'s latest conversational model' },
+  { name: 'kimi-k2.5:cloud', model: 'kimi-k2.5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'kimi', parameter_size: '249b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Moonshot\'s massive reasoning model' },
+  { name: 'kimi-k2-thinking:cloud', model: 'kimi-k2-thinking:cloud', modified_at: '', size: 0, digest: '', details: { family: 'kimi', parameter_size: '55b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Kimi with enhanced chain-of-thought' },
+  { name: 'mistral-large-3:cloud', model: 'mistral-large-3:cloud', modified_at: '', size: 0, digest: '', details: { family: 'mistral', parameter_size: '123b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools'], description: 'Mistral\'s flagship large model' },
+  { name: 'deepseek-v3.2:cloud', model: 'deepseek-v3.2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'deepseek', parameter_size: '236b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'DeepSeek\'s advanced reasoning model' },
+  { name: 'deepseek-v3.1:cloud', model: 'deepseek-v3.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'deepseek', parameter_size: '671b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'DeepSeek V3 with massive parameter count' },
+  { name: 'gemini-3-flash-preview:cloud', model: 'gemini-3-flash-preview:cloud', modified_at: '', size: 0, digest: '', details: { family: 'gemini', parameter_size: '135b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools', 'thinking'], description: 'Google Gemini 3 Flash preview' },
+  { name: 'cogito-2.1:cloud', model: 'cogito-2.1:cloud', modified_at: '', size: 0, digest: '', details: { family: 'cogito', parameter_size: '671b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Advanced cognitive reasoning model' },
+  { name: 'devstral-2:cloud', model: 'devstral-2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'devstral', parameter_size: '123b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools'], description: 'Mistral\'s large developer model' },
+  { name: 'kimi-k2:cloud', model: 'kimi-k2:cloud', modified_at: '', size: 0, digest: '', details: { family: 'kimi', parameter_size: '60b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools'], description: 'Moonshot\'s versatile model' },
+  { name: 'gemma3:cloud', model: 'gemma3:cloud', modified_at: '', size: 0, digest: '', details: { family: 'gemma', parameter_size: '27b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools'], description: 'Google\'s efficient multimodal model' },
+  { name: 'qwen3-vl:cloud', model: 'qwen3-vl:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '32b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'vision', 'tools'], description: 'Qwen vision-language model' },
+  { name: 'qwen3-coder:cloud', model: 'qwen3-coder:cloud', modified_at: '', size: 0, digest: '', details: { family: 'qwen', parameter_size: '30b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools'], description: 'Qwen specialized for code generation' },
+  { name: 'glm-5:cloud', model: 'glm-5:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '40b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Zhipu\'s general-purpose model' },
+  { name: 'glm-4.7:cloud', model: 'glm-4.7:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '90b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Zhipu\'s large reasoning model' },
+  { name: 'glm-4.6:cloud', model: 'glm-4.6:cloud', modified_at: '', size: 0, digest: '', details: { family: 'glm', parameter_size: '105b', quantization_level: '', format: '', families: [] }, capabilities: ['cloud', 'tools', 'thinking'], description: 'Zhipu\'s frontier model' },
 ];

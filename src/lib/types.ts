@@ -45,6 +45,37 @@ export interface OllamaModel {
   };
 }
 
+export interface AuthState {
+  status: 'checking' | 'signed-in' | 'signed-out';
+  username?: string;
+  email?: string;
+  avatar?: string;
+  apiKey?: string;
+}
+
+export interface ModelShowInfo {
+  modelfile: string;
+  parameters: string;
+  template: string;
+  details: {
+    parent_model: string;
+    format: string;
+    family: string;
+    families: string[];
+    parameter_size: string;
+    quantization_level: string;
+  };
+  model_info?: Record<string, unknown>;
+}
+
+export interface PullProgress {
+  status: string;
+  digest?: string;
+  total?: number;
+  completed?: number;
+  error?: string;
+}
+
 export interface Settings {
   ollamaHost: string;
   temperature: number;
