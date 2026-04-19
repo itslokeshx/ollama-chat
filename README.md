@@ -4,14 +4,14 @@
 
 # Ollama Chat
 
-**A native Linux desktop UI for Ollama — under 10MB, no Docker, no Node.js, no nonsense.**
+**A native Linux desktop UI for Ollama — under 5MB, no Docker, no Node.js, no nonsense.**
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Tauri 2.0](https://img.shields.io/badge/Tauri-2.0-orange?logo=tauri)](https://tauri.app)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey?logo=linux)](https://github.com/itslokeshx/ollama-chat/releases)
-[![Size](https://img.shields.io/badge/install%20size-%3C10MB-brightgreen)](#-installation)
+[![Size](https://img.shields.io/badge/install%20size-%3C5MB-brightgreen)](#-installation)
 
 <br>
 
@@ -100,7 +100,7 @@ This is what Ollama for Linux should have been from day one.
 
 [![Download Ollama Chat](https://img.shields.io/badge/Download-ollama--chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/latest/download/ollama-chat_1.0.0_amd64.deb)
 
-**Latest version: v1.0.0** | **Size: <10MB** | **Platform: Linux (amd64)**
+**Latest version: v1.0.0** | **Size: <5MB** | **Platform: Linux (amd64)**
 
 </div>
 
@@ -216,7 +216,7 @@ That's it! You're ready to chat with your local AI models.
 
 - Installs as a real `.deb` package — shows up in your app menu
 - Custom titlebar with native window controls
-- Under 10MB installed
+- Under 5MB installed
 - No Docker, no Node.js, no background server processes
 - Works offline (for local models)
 
