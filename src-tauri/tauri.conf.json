@@ -17,10 +17,13 @@
         "height": 860,
         "minWidth": 900,
         "minHeight": 600,
-        "decorations": false,
+        "decorations": true,
         "transparent": false,
         "center": true,
-        "resizable": true
+        "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "closable": true
       }
     ],
     "security": {
@@ -29,7 +32,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "appimage"],
+    "targets": ["deb"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

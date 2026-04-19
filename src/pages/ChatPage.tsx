@@ -431,21 +431,9 @@ export default function ChatPage() {
 
       <div
         className="flex items-center h-9 px-3 bg-sidebar border-b border-sidebar-border shrink-0"
-        data-tauri-drag-region
-        style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
         data-testid="titlebar"
       >
-        <div
-          className="flex items-center gap-2"
-          style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
-        >
-          {window.__TAURI__ && (
-            <div className="flex items-center gap-1.5 mr-2">
-              <button onClick={() => window.__TAURI__?.window.getCurrent().close()} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors" />
-              <button onClick={() => window.__TAURI__?.window.getCurrent().minimize()} className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors" />
-              <button onClick={() => window.__TAURI__?.window.getCurrent().toggleMaximize()} className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors" />
-            </div>
-          )}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             className="p-1.5 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
