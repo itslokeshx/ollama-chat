@@ -12,6 +12,31 @@ import {
 } from '@/lib/model-utils';
 import { isVisionModel } from '@/lib/types';
 
+function getProviderPrefix(family: string = '') {
+  const f = family.toLowerCase().replace(/[0-9.]/g, ''); // strip numbers
+  const map: Record<string, string> = {
+    llama: 'Meta',
+    gemma: 'Google',
+    qwen: 'Alibaba',
+    mistral: 'Mistral',
+    mixtral: 'Mistral',
+    phi: 'Microsoft',
+    deepseek: 'DeepSeek',
+    nemotron: 'NVIDIA',
+    minimax: 'MiniMax',
+    kimi: 'Moonshot AI',
+    glm: 'Zhipu AI',
+    gptoss: 'Open Weights',
+    granite: 'IBM',
+    command: 'Cohere',
+    starcoder: 'BigCode',
+  };
+  
+  if (map[f]) return map[f];
+  if (!family) return 'Other';
+  return family.charAt(0).toUpperCase() + family.slice(1);
+}
+
 interface Props {
   models: OllamaModel[];
   selectedModel: string;
@@ -170,21 +195,31 @@ export function ModelSelectorPopover({
   const filteredLocal = filterModels(localModels);
   const filteredCloud = filterModels(cloudModels);
 
-  // Group local models by tier
+  // Group local models by provider
   const groupedLocal = useMemo(() => {
-    const groups: Record<ModelTier, OllamaModel[]> = {
-      frontier: [],
-      balanced: [],
-      efficient: [],
-      cloud: [],
-    };
+    const groups: Record<string, OllamaModel[]> = {};
     for (const model of filteredLocal) {
-      groups[getModelTier(model)].push(model);
+      const provider = getProviderPrefix(model.details?.family);
+      if (!groups[provider]) groups[provider] = [];
+      groups[provider].push(model);
     }
-    return (['frontier', 'balanced', 'efficient'] as ModelTier[])
-      .map((tier) => ({ tier, info: getTierInfo(tier), models: groups[tier] }))
-      .filter((g) => g.models.length > 0);
+    return Object.entries(groups)
+      .map(([provider, models]) => ({ provider, models }))
+      .sort((a, b) => a.provider.localeCompare(b.provider));
   }, [filteredLocal]);
+
+  // Group cloud models by provider
+  const groupedCloud = useMemo(() => {
+    const groups: Record<string, OllamaModel[]> = {};
+    for (const model of filteredCloud) {
+      const provider = getProviderPrefix(model.details?.family);
+      if (!groups[provider]) groups[provider] = [];
+      groups[provider].push(model);
+    }
+    return Object.entries(groups)
+      .map(([provider, models]) => ({ provider, models }))
+      .sort((a, b) => a.provider.localeCompare(b.provider));
+  }, [filteredCloud]);
 
   const displayName = selectedModel.split(':')[0] || 'Select model';
   const isCloud = selectedModel.includes(':cloud');
@@ -231,11 +266,10 @@ export function ModelSelectorPopover({
                   Local Models
                 </div>
                 {groupedLocal.map((group) => (
-                  <div key={group.tier}>
+                  <div key={group.provider} className="mb-2">
                     <div className="px-3 py-1 flex items-center gap-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${group.info.dotColor}`} />
-                      <span className={`text-[10px] font-medium ${group.info.color}`}>
-                        {group.info.label}
+                      <span className="text-[10px] font-medium text-muted-foreground/80">
+                        {group.provider}
                       </span>
                     </div>
                     {group.models.map((m) => (
@@ -299,16 +333,25 @@ export function ModelSelectorPopover({
                   </div>
                 )}
                 {authState.status === 'signed-in' &&
-                  filteredCloud.map((m) => (
-                    <ModelRow
-                      key={m.name}
-                      model={m}
-                      isSelected={m.name === selectedModel}
-                      onClick={() => {
-                        onModelChange(m.name);
-                        setIsOpen(false);
-                      }}
-                    />
+                  groupedCloud.map((group) => (
+                    <div key={group.provider} className="mb-2">
+                      <div className="px-3 py-1 flex items-center gap-1.5">
+                        <span className="text-[10px] font-medium text-muted-foreground/80">
+                          {group.provider}
+                        </span>
+                      </div>
+                      {group.models.map((m) => (
+                        <ModelRow
+                          key={m.name}
+                          model={m}
+                          isSelected={m.name === selectedModel}
+                          onClick={() => {
+                            onModelChange(m.name);
+                            setIsOpen(false);
+                          }}
+                        />
+                      ))}
+                    </div>
                   ))}
               </div>
             )}
