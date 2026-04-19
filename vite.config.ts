@@ -4,10 +4,9 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 const port = Number(process.env.PORT || "5173");
-const basePath = process.env.BASE_PATH || "/";
 
-export default defineConfig({
-  base: basePath,
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? './' : '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -23,14 +22,30 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    target: ['es2021', 'chrome100', 'safari13'],
+    minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
+    sourcemap: !!process.env.TAURI_DEBUG,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-popover'],
+          motion: ['framer-motion'],
+        }
+      }
+    }
   },
   server: {
-    port,
+    port: 5173,
+    strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {
       strict: true,
       deny: ["**/.*"],
+    },
+    watch: {
+      ignored: ['**/src-tauri/**'],
     },
   },
   preview: {
@@ -38,4 +53,5 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: true,
   },
-});
+  clearScreen: false,
+}));
