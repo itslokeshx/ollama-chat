@@ -30,7 +30,21 @@ export function useAuthStore(ollamaHost: string) {
     try {
       const res = await window.fetch(`${ollamaHost}/api/whoami`, { method: 'GET', signal: AbortSignal.timeout(5000) });
       if (res.status === 404) {
-        setIsSupported(false); // Stop polling forever
+        setIsSupported(false); // Stop polling whoami
+        
+        // Fallback: check if they have cloud models exposed in tags
+        const tagsRes = await window.fetch(`${ollamaHost}/api/tags`, { method: 'GET', signal: AbortSignal.timeout(5000) });
+        if (tagsRes.ok) {
+          const data = await tagsRes.json();
+          const hasCloud = data.models?.some((m: any) => m.name.includes(':cloud') || m.remote_host);
+          if (hasCloud) {
+            const newState: AuthState = { status: 'signed-in', username: 'Cloud User' };
+            setAuthState(newState);
+            saveAuthState(newState);
+            return;
+          }
+        }
+        
         const newState: AuthState = { status: 'signed-out' };
         setAuthState(newState);
         saveAuthState(newState);
@@ -68,8 +82,8 @@ export function useAuthStore(ollamaHost: string) {
 
   // Check auth on mount and start polling
   useEffect(() => {
+    checkAuth();
     if (isSupported) {
-      checkAuth();
       pollTimerRef.current = setInterval(checkAuth, POLL_INTERVAL);
     }
     return () => {
