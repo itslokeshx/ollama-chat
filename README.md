@@ -110,6 +110,10 @@ This is what Ollama for Linux should have been from day one.
 </div>
 
 ```bash
+# Download the .deb file
+wget https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb
+
+# Install it
 sudo dpkg -i Ollama.Chat_1.0.0_amd64.deb
 ```
 
