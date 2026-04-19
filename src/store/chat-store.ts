@@ -183,26 +183,53 @@ export function useChatStore() {
     setActiveId(null);
   }, [updateConversations]);
 
-  const exportAllConversations = useCallback(() => {
-    const blob = new Blob([JSON.stringify(conversations, null, 2)], {
-      type: "application/json",
-    });
+  const exportAllConversations = useCallback(async () => {
+    const content = JSON.stringify(conversations, null, 2);
+    const defaultName = `all-chats-${Date.now()}.json`;
+    
+    // Try Tauri native dialog if available
+    if (window.__TAURI__) {
+      try {
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+        
+        const path = await save({
+          defaultPath: defaultName,
+          filters: [{ name: 'JSON', extensions: ['json'] }]
+        });
+        
+        if (path) {
+          await writeTextFile(path, content);
+          return;
+        }
+      } catch {
+        // Fall through to browser download
+      }
+    }
+    
+    // Fallback to browser download
+    const blob = new Blob([content], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ollama-chat-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = defaultName;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [conversations]);
 
   const exportCurrentConversation = useCallback(
-    (format: "json" | "md") => {
+    async (format: "json" | "md") => {
       if (!activeConversation) return;
       let content: string;
-      let filename: string;
+      let defaultName: string;
+      let extension: string;
+      
       if (format === "json") {
         content = JSON.stringify(activeConversation, null, 2);
-        filename = `chat-${activeConversation.id}.json`;
+        extension = "json";
+        defaultName = `chat-${activeConversation.id}.json`;
       } else {
         const lines = [`# ${activeConversation.title}\n`];
         for (const m of activeConversation.messages) {
@@ -210,14 +237,41 @@ export function useChatStore() {
           lines.push(m.content + "\n");
         }
         content = lines.join("\n");
-        filename = `chat-${activeConversation.id}.md`;
+        extension = "md";
+        defaultName = `chat-${activeConversation.id}.md`;
       }
+      
+      // Try Tauri native dialog if available
+      if (window.__TAURI__) {
+        try {
+          const { save } = await import('@tauri-apps/plugin-dialog');
+          const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+          
+          const path = await save({
+            defaultPath: defaultName,
+            filters: format === "json" 
+              ? [{ name: 'JSON', extensions: ['json'] }]
+              : [{ name: 'Markdown', extensions: ['md'] }]
+          });
+          
+          if (path) {
+            await writeTextFile(path, content);
+            return;
+          }
+        } catch {
+          // Fall through to browser download
+        }
+      }
+      
+      // Fallback to browser download
       const blob = new Blob([content], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
+      a.download = defaultName;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     },
     [activeConversation],
