@@ -150,6 +150,7 @@ export function ModelSelectorPopover({
   onSignIn,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'local' | 'cloud'>('local');
   const [search, setSearch] = useState('');
   const popoverRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -172,11 +173,11 @@ export function ModelSelectorPopover({
   }, [isOpen]);
 
   const localModels = useMemo(
-    () => models.filter((m) => !m.name.includes(':cloud')),
+    () => models.filter((m) => !m.name.includes(':cloud') && !m.name.includes('-cloud')),
     [models]
   );
   const cloudModels = useMemo(
-    () => models.filter((m) => m.name.includes(':cloud')),
+    () => models.filter((m) => m.name.includes(':cloud') || m.name.includes('-cloud')),
     [models]
   );
 
@@ -241,6 +242,27 @@ export function ModelSelectorPopover({
 
       {isOpen && (
         <div className="model-selector-popover absolute bottom-full left-0 mb-1 w-80 bg-popover border border-popover-border rounded-xl shadow-xl z-50 overflow-hidden">
+          {/* Tabs */}
+          <div className="flex p-1 bg-muted/50 border-b border-border">
+            <button
+              onClick={() => { setActiveTab('local'); setSearch(''); searchRef.current?.focus(); }}
+              className={`flex-1 py-1 px-2 text-xs font-medium rounded-md transition-colors ${
+                activeTab === 'local' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Local
+            </button>
+            <button
+              onClick={() => { setActiveTab('cloud'); setSearch(''); searchRef.current?.focus(); }}
+              className={`flex-1 flex items-center justify-center gap-1 py-1 px-2 text-xs font-medium rounded-md transition-colors ${
+                activeTab === 'cloud' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Cloud size={11} className={activeTab === 'cloud' ? 'text-sky-500' : ''} />
+              Cloud
+            </button>
+          </div>
+
           {/* Search */}
           <div className="p-2 border-b border-border">
             <div className="relative">
@@ -248,10 +270,10 @@ export function ModelSelectorPopover({
               <input
                 ref={searchRef}
                 type="text"
-                placeholder="Search models..."
+                placeholder={`Search ${activeTab} models...`}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-muted border border-border focus:outline-none focus:ring-1 focus:ring-ring text-foreground placeholder:text-muted-foreground"
+                className="w-full pl-8 pr-3 py-1.5 text-[11px] rounded-md bg-muted border border-border focus:outline-none focus:ring-1 focus:ring-ring text-foreground placeholder:text-muted-foreground"
                 data-testid="input-search-models"
               />
             </div>
@@ -260,15 +282,12 @@ export function ModelSelectorPopover({
           {/* Model list */}
           <div className="max-h-[360px] overflow-y-auto py-1">
             {/* Local models */}
-            {groupedLocal.length > 0 && (
+            {activeTab === 'local' && groupedLocal.length > 0 && (
               <div>
-                <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm z-10">
-                  Local Models
-                </div>
                 {groupedLocal.map((group) => (
                   <div key={group.provider} className="mb-2">
                     <div className="px-3 py-1 flex items-center gap-1.5">
-                      <span className="text-[10px] font-medium text-muted-foreground/80">
+                      <span className="text-[10px] font-medium text-muted-foreground/80 uppercase">
                         {group.provider}
                       </span>
                     </div>
@@ -289,54 +308,56 @@ export function ModelSelectorPopover({
             )}
 
             {/* Empty local state */}
-            {filteredLocal.length === 0 && localModels.length === 0 && (
-              <div className="px-4 py-4 text-center">
+            {activeTab === 'local' && filteredLocal.length === 0 && (
+              <div className="px-4 py-8 flex flex-col items-center justify-center text-center gap-2">
+                <Telescope size={24} className="text-muted-foreground/50" />
                 <p className="text-xs text-muted-foreground">
-                  No models installed.{' '}
+                  {search ? `No local models matching "${search}"` : 'No models installed.'}
+                </p>
+                {!search && (
                   <button
                     onClick={() => {
                       setIsOpen(false);
                       onBrowseModels();
                     }}
-                    className="text-primary hover:underline"
+                    className="text-primary hover:underline text-xs"
                   >
                     Browse models to get started →
                   </button>
-                </p>
+                )}
               </div>
             )}
 
-            {/* Cloud models divider */}
-            {cloudModels.length > 0 && (
+            {/* Cloud models */}
+            {activeTab === 'cloud' && (
               <div className="mt-1">
-                <div className="px-3 py-1.5 flex items-center justify-between text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm z-10">
-                  <span>Cloud Models</span>
-                  {authState.status !== 'signed-in' && (
+                {authState.status !== 'signed-in' && (
+                  <div className="px-5 py-8 flex flex-col items-center justify-center text-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                      <Lock size={18} className="text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium mb-1 text-foreground">Sign in Required</p>
+                      <p className="text-[11px] text-muted-foreground max-w-[200px]">
+                        Cloud models require an active Ollama account session.
+                      </p>
+                    </div>
                     <button
                       onClick={() => {
                         setIsOpen(false);
                         onSignIn();
                       }}
-                      className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-medium normal-case"
+                      className="mt-2 px-3 py-1.5 bg-primary text-primary-foreground text-xs font-medium rounded-md hover:opacity-90"
                     >
-                      <Lock size={10} />
-                      Sign in
+                      Sign In Now
                     </button>
-                  )}
-                </div>
-                {authState.status !== 'signed-in' && (
-                  <div className="px-4 py-2">
-                    <p className="text-[11px] text-muted-foreground">
-                      <Lock size={10} className="inline mr-1 relative -top-[1px]" />
-                      Sign in to use cloud models
-                    </p>
                   </div>
                 )}
-                {authState.status === 'signed-in' &&
+                {authState.status === 'signed-in' && groupedCloud.length > 0 &&
                   groupedCloud.map((group) => (
                     <div key={group.provider} className="mb-2">
                       <div className="px-3 py-1 flex items-center gap-1.5">
-                        <span className="text-[10px] font-medium text-muted-foreground/80">
+                        <span className="text-[10px] font-medium text-muted-foreground/80 uppercase">
                           {group.provider}
                         </span>
                       </div>
@@ -353,13 +374,12 @@ export function ModelSelectorPopover({
                       ))}
                     </div>
                   ))}
-              </div>
-            )}
-
-            {/* No search results */}
-            {filteredLocal.length === 0 && filteredCloud.length === 0 && search && (
-              <div className="px-4 py-4 text-center">
-                <p className="text-xs text-muted-foreground">No models matching "{search}"</p>
+                  
+                {authState.status === 'signed-in' && filteredCloud.length === 0 && search && (
+                  <div className="px-4 py-8 text-center text-xs text-muted-foreground">
+                    No cloud models matching "{search}"
+                  </div>
+                )}
               </div>
             )}
           </div>
