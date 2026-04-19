@@ -5,12 +5,12 @@ import {
   Square,
   ChevronDown,
   AlertTriangle,
-  Eye,
 } from "lucide-react";
-import type { FileAttachment, OllamaModel } from "@/lib/types";
+import type { FileAttachment, OllamaModel, AuthState } from "@/lib/types";
 import { isVisionModel } from "@/lib/types";
 import { FileChip } from "./FileChip";
 import { processFile } from "@/lib/file-utils";
+import { ModelSelectorPopover } from "./ModelSelectorPopover";
 
 interface Props {
   disabled?: boolean;
@@ -23,6 +23,9 @@ interface Props {
   sendOnEnter: boolean;
   showTokenCount: boolean;
   onImageClick?: (src: string) => void;
+  authState: AuthState;
+  onBrowseModels: () => void;
+  onSignIn: () => void;
 }
 
 export function InputArea({
@@ -36,13 +39,14 @@ export function InputArea({
   sendOnEnter,
   showTokenCount,
   onImageClick,
+  authState,
+  onBrowseModels,
+  onSignIn,
 }: Props) {
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
-  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const hasImages = attachments.some((a) => a.type === "image");
   const visionCapable = isVisionModel(selectedModel);
@@ -60,17 +64,11 @@ export function InputArea({
   }, [text]);
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setShowModelDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 160) + "px";
+  }, [text]);
 
   const handleSend = useCallback(() => {
     if (!text.trim() && attachments.length === 0) return;
@@ -116,15 +114,6 @@ export function InputArea({
 
   const removeAttachment = (id: string) => {
     setAttachments((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  const getModelDisplayName = (name: string) => {
-    const parts = name.split(":");
-    return parts[0];
-  };
-
-  const getParamSize = (model: OllamaModel) => {
-    return model.details?.parameter_size ?? "";
   };
 
   const canSend = (text.trim() || attachments.length > 0) && !disabled;
@@ -211,111 +200,14 @@ export function InputArea({
             data-testid="input-file"
           />
 
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setShowModelDropdown((v) => !v)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-transparent hover:border-border"
-              data-testid="button-model-selector"
-            >
-              {isVisionModel(selectedModel) && (
-                <Eye size={12} className="text-blue-500" />
-              )}
-              <span className="max-w-[120px] truncate">
-                {getModelDisplayName(selectedModel) || "Select model"}
-              </span>
-              <ChevronDown size={12} />
-            </button>
-
-            {showModelDropdown && (
-              <div className="absolute bottom-full left-0 mb-1 w-64 bg-popover border border-popover-border rounded-xl shadow-lg py-1 z-50 max-h-80 overflow-y-auto flex flex-col">
-                {models.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-muted-foreground">
-                    No models found
-                  </div>
-                ) : (
-                  <>
-                    {models.filter((m) => !m.name.includes(":cloud")).length >
-                      0 && (
-                      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30 sticky top-0 backdrop-blur-md">
-                        Local Models
-                      </div>
-                    )}
-                    {models
-                      .filter((m) => !m.name.includes(":cloud"))
-                      .map((m) => (
-                        <button
-                          key={m.name}
-                          onClick={() => {
-                            onModelChange(m.name);
-                            setShowModelDropdown(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-accent transition-colors ${m.name === selectedModel ? "bg-accent" : ""}`}
-                          data-testid={`model-option-${m.name}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {isVisionModel(m.name) && (
-                              <Eye size={11} className="text-blue-500" />
-                            )}
-                            <span className="font-medium text-foreground">
-                              {m.name.split(":")[0]}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            {getParamSize(m) && (
-                              <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-xs">
-                                {getParamSize(m)}
-                              </span>
-                            )}
-                            <span className="text-muted-foreground text-xs">
-                              {m.details?.family ?? ""}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-
-                    {models.filter((m) => m.name.includes(":cloud")).length >
-                      0 && (
-                      <div className="px-3 py-2 mt-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30 sticky top-0 backdrop-blur-md">
-                        Cloud Models
-                      </div>
-                    )}
-                    {models
-                      .filter((m) => m.name.includes(":cloud"))
-                      .map((m) => (
-                        <button
-                          key={m.name}
-                          onClick={() => {
-                            onModelChange(m.name);
-                            setShowModelDropdown(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-accent transition-colors ${m.name === selectedModel ? "bg-accent" : ""}`}
-                          data-testid={`model-option-${m.name}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {isVisionModel(m.name) && (
-                              <Eye size={11} className="text-blue-500" />
-                            )}
-                            <span className="font-medium text-foreground">
-                              {m.name.split(":")[0]}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            {getParamSize(m) && (
-                              <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-xs">
-                                {getParamSize(m)}
-                              </span>
-                            )}
-                            <span className="text-muted-foreground text-xs">
-                              {m.details?.family ?? ""}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+          <ModelSelectorPopover
+            models={models}
+            selectedModel={selectedModel}
+            onModelChange={onModelChange}
+            authState={authState}
+            onBrowseModels={onBrowseModels}
+            onSignIn={onSignIn}
+          />
         </div>
 
         {showTokenCount && (

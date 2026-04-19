@@ -399,3 +399,39 @@ code {
     pointer-events: none;
   }
 }
+
+/* Sign-in modal animations */
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.signin-modal-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.signin-modal-content {
+  animation: fadeScale 0.2s ease-out;
+}
+
+/* Capability Badges */
+.capability-badge {
+  letter-spacing: 0.02em;
+}
+
+/* Progress component animations */
+[data-state='loading'] .progress-indicator {
+  transition: transform 0.5s ease;
+}
+
+/* Model Selector Popover */
+.model-selector-popover {
+  animation: fadeScale 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top left;
+}

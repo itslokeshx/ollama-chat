@@ -76,6 +76,20 @@ export interface PullProgress {
   error?: string;
 }
 
+declare global {
+  interface Window {
+    __TAURI__?: {
+      window: {
+        getCurrent: () => {
+          close: () => void;
+          minimize: () => void;
+          toggleMaximize: () => void;
+        };
+      };
+    };
+  }
+}
+
 export interface Settings {
   ollamaHost: string;
   temperature: number;

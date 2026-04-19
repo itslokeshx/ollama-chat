@@ -14,9 +14,9 @@ export function formatRelativeTime(ts: number): string {
   return new Date(ts).toLocaleDateString();
 }
 
-export function groupConversationsByDate(conversations: { updatedAt: number; [key: string]: unknown }[]): {
+export function groupConversationsByDate<T extends { updatedAt: number }>(conversations: T[]): {
   label: string;
-  items: typeof conversations;
+  items: T[];
 }[] {
   const now = Date.now();
   const today = new Date();
@@ -26,7 +26,7 @@ export function groupConversationsByDate(conversations: { updatedAt: number; [ke
   const thisWeekStart = new Date(today);
   thisWeekStart.setDate(today.getDate() - today.getDay());
 
-  const groups: { label: string; items: typeof conversations }[] = [
+  const groups: { label: string; items: T[] }[] = [
     { label: 'Today', items: [] },
     { label: 'Yesterday', items: [] },
     { label: 'This Week', items: [] },

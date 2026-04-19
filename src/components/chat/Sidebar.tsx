@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Plus, Search, Trash2, MessageSquare, ChevronDown, ChevronRight } from 'lucide-react';
 import type { Conversation } from '@/lib/types';
 import { groupConversationsByDate, formatRelativeTime } from '@/lib/time-utils';
+import { Telescope } from 'lucide-react';
+import type { AuthState } from '@/lib/types';
+import { AccountWidget } from './AccountWidget';
 
 interface Props {
   open: boolean;
@@ -10,9 +13,13 @@ interface Props {
   onSelect: (id: string) => void;
   onNewChat: () => void;
   onDelete: (id: string) => void;
+  authState: AuthState;
+  onSignIn: () => void;
+  onSignOut: () => void;
+  onBrowseModels: () => void;
 }
 
-export function Sidebar({ open, conversations, activeId, onSelect, onNewChat, onDelete }: Props) {
+export function Sidebar({ open, conversations, activeId, onSelect, onNewChat, onDelete, authState, onSignIn, onSignOut, onBrowseModels }: Props) {
   const [search, setSearch] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -21,10 +28,7 @@ export function Sidebar({ open, conversations, activeId, onSelect, onNewChat, on
     ? conversations.filter((c) => c.title.toLowerCase().includes(search.toLowerCase()))
     : conversations;
 
-  const groups = groupConversationsByDate(filtered as { updatedAt: number; [key: string]: unknown }[]) as {
-    label: string;
-    items: Conversation[];
-  }[];
+  const groups = groupConversationsByDate(filtered);
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -131,8 +135,19 @@ export function Sidebar({ open, conversations, activeId, onSelect, onNewChat, on
           ))}
         </div>
 
-        <div className="px-4 py-2 border-t border-sidebar-border">
-          <span className="text-xs text-muted-foreground">Ollama Chat v1.0</span>
+        <div className="flex-none flex flex-col pt-2 border-t border-sidebar-border">
+          <button
+            onClick={onBrowseModels}
+            className="flex items-center gap-2 mx-3 mb-2 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
+            data-testid="button-sidebar-browse"
+          >
+            <Telescope size={15} className="text-primary/80" />
+            Browse Models
+          </button>
+          
+          <div className="px-1 pb-1">
+            <AccountWidget authState={authState} onSignIn={onSignIn} onSignOut={onSignOut} />
+          </div>
         </div>
       </div>
     </div>

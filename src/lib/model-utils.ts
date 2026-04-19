@@ -99,7 +99,7 @@ export function getModelCapabilities(model: OllamaModel): ModelCapability[] {
   }
 
   // Deduplicate
-  return [...new Set(caps)];
+  return Array.from(new Set(caps));
 }
 
 /**

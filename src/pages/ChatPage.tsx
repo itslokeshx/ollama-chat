@@ -25,6 +25,10 @@ import { SystemPromptPanel } from "@/components/chat/SystemPromptPanel";
 import { SettingsModal } from "@/components/chat/SettingsModal";
 import { EmptyState } from "@/components/chat/EmptyState";
 import { LightboxModal } from "@/components/chat/LightboxModal";
+import { SignInModal } from "@/components/chat/SignInModal";
+import { ModelBrowser } from "@/components/chat/ModelBrowser";
+import { ModelInfoPanel } from "@/components/chat/ModelInfoPanel";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function ChatPage() {
   const store = useChatStore();
@@ -57,10 +61,18 @@ export default function ChatPage() {
   }, []);
   const [pendingFiles, setPendingFiles] = useState<FileAttachment[]>([]);
 
+  const [modelBrowserOpen, setModelBrowserOpen] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [modelInfoOpen, setModelInfoOpen] = useState(false);
+
+  const { authState, checkAuth, signOut, getApiConfig } = useAuthStore(settings.ollamaHost);
+
   const abortRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragCounter = useRef(0);
+  
+  const isCloudModel = selectedModel.includes(':cloud');
 
   const isDark =
     settings.theme === "dark" ||
@@ -214,8 +226,10 @@ export default function ChatPage() {
 
       let accum = "";
 
+      const apiConfig = getApiConfig(selectedModel);
+
       await streamChat(
-        settings.ollamaHost,
+        apiConfig.host,
         selectedModel,
         ollamaMessages,
         {
@@ -256,6 +270,7 @@ export default function ChatPage() {
           },
         },
         abortRef.current.signal,
+        apiConfig.headers
       );
     },
     [
@@ -413,6 +428,13 @@ export default function ChatPage() {
           className="flex items-center gap-2"
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
+          {window.__TAURI__ && (
+            <div className="flex items-center gap-1.5 mr-2">
+              <button onClick={() => window.__TAURI__?.window.getCurrent().close()} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors" />
+              <button onClick={() => window.__TAURI__?.window.getCurrent().minimize()} className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors" />
+              <button onClick={() => window.__TAURI__?.window.getCurrent().toggleMaximize()} className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors" />
+            </div>
+          )}
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             className="p-1.5 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
@@ -452,9 +474,15 @@ export default function ChatPage() {
         </div>
 
         <div
-          className="flex items-center gap-1"
+          className="flex items-center gap-2"
           style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
         >
+          {isCloudModel ? (
+             <span className="flex items-center gap-1 text-[10px] bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-0.5 rounded-full font-medium">☁ Cloud</span>
+           ) : (
+             <span className="flex items-center gap-1 text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-medium">⚡ Local</span>
+          )}
+
           {activeConversation && (
             <div className="relative group">
               <button
@@ -506,6 +534,15 @@ export default function ChatPage() {
           </button>
 
           <button
+            onClick={() => setModelInfoOpen(v => !v)}
+            className={`p-1.5 rounded-md transition-colors ${modelInfoOpen ? "bg-sidebar-accent text-foreground" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"}`}
+            title="Model info"
+            data-testid="button-toggle-model-info"
+          >
+             <AlertTriangle size={15} className="rotate-180" />
+          </button>
+
+          <button
             onClick={() => setSettingsOpen(true)}
             className="p-1.5 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
             title="Settings (Ctrl+/)"
@@ -524,6 +561,10 @@ export default function ChatPage() {
           onSelect={handleSelectConversation}
           onNewChat={handleNewChat}
           onDelete={store.deleteConversation}
+          authState={authState}
+          onSignIn={() => setSignInOpen(true)}
+          onSignOut={signOut}
+          onBrowseModels={() => setModelBrowserOpen(true)}
         />
 
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -643,8 +684,20 @@ export default function ChatPage() {
             sendOnEnter={settings.sendOnEnter}
             showTokenCount={settings.showTokenCount}
             onImageClick={setLightboxSrc}
+            authState={authState}
+            onBrowseModels={() => setModelBrowserOpen(true)}
+            onSignIn={() => setSignInOpen(true)}
           />
         </div>
+        
+        <ModelInfoPanel
+          open={modelInfoOpen}
+          modelName={selectedModel}
+          models={models}
+          ollamaHost={settings.ollamaHost}
+          onRefreshModels={loadModels}
+          onModelChange={setSelectedModel}
+        />
       </div>
 
       <SettingsModal
@@ -657,6 +710,22 @@ export default function ChatPage() {
       />
 
       <LightboxModal src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      
+      <SignInModal
+        open={signInOpen}
+        onClose={() => setSignInOpen(false)}
+        onCheckAuth={checkAuth}
+        authState={authState}
+      />
+      
+      <ModelBrowser
+        open={modelBrowserOpen}
+        onClose={() => setModelBrowserOpen(false)}
+        localModels={models.filter(m => !m.name.includes(':cloud'))}
+        onModelSelected={setSelectedModel}
+        ollamaHost={settings.ollamaHost}
+        onRefreshModels={loadModels}
+      />
     </div>
   );
 }
