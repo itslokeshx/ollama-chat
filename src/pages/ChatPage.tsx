@@ -88,10 +88,12 @@ export default function ChatPage() {
       const data = await fetchModels(settings.ollamaHost);
       const mods = (data.models ?? []) as OllamaModel[];
 
-      // Combine local and cloud models, deduplicating by name
+      // Combine local and cloud models, deduplicating by base name
       const allModels = [...mods];
       for (const cm of CLOUD_MODELS) {
-        if (!allModels.find((m) => m.name === cm.name)) {
+        if (
+          !allModels.find((m) => m.name.split(":")[0] === cm.name.split(":")[0])
+        ) {
           allModels.push(cm);
         }
       }
@@ -239,8 +241,11 @@ export default function ChatPage() {
             const isModelNotFound =
               err.message.includes("not found") &&
               err.message.includes("model");
+            const modelToRun = selectedModel.includes(":cloud")
+              ? selectedModel
+              : `${selectedModel}:cloud`;
             const fallbackMsg = isModelNotFound
-              ? `Error: ${err.message}\n\n**This model is not downloaded locally yet.**\nTo run it, open your terminal and run:\n\`\`\`bash\nollama run ${selectedModel}\n\`\`\``
+              ? `Error: ${err.message}\n\n**This model is not downloaded locally yet.**\nTo run it, open your terminal and run:\n\`\`\`bash\nollama run ${modelToRun}\n\`\`\``
               : `Error: ${err.message}\n\nMake sure Ollama is running with:\n\`\`\`bash\nollama serve\n\`\`\``;
 
             store.updateMessage(convId!, assistantMsgId, {
