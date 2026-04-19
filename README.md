@@ -11,7 +11,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey?logo=linux)](https://github.com/itslokeshx/ollama-chat/releases)
-[![Size](https://img.shields.io/badge/install%20size-%3C5MB-brightgreen)](#-installation)
+[![Size](https://img.shields.io/badge/install%20size-~3.5MB-brightgreen)](#-installation)
 
 <br>
 
@@ -36,6 +36,10 @@
 - [🏗 Build from Source](#-build-from-source)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
+
+---
+
+## 🤔 Why I built this
 
 If you use Ollama on Linux, you already know the pain.
 
