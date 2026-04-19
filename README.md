@@ -15,16 +15,11 @@
 
 <br>
 
+[![Download Ollama Chat](https://img.shields.io/badge/Download-ollama--chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/latest/download/ollama-chat_1.0.0_amd64.deb)
+
+<br>
+
 <img src="public/screenshot.png" alt="Ollama Chat Screenshot" width="100%" style="border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);" />
-
-<p align="center">
-  <a href="#-installation"><strong>⬇ Download .deb</strong></a> · 
-  <a href="#-features">Features</a> · 
-  <a href="#-screenshots">Screenshots</a> · 
-  <a href="#-why-i-built-this">Why I built this</a>
-</p>
-
-[![Star History Chart](https://api.star-history.com/svg?repos=itslokeshx/ollama-chat&type=Date)](https://star-history.com/#itslokeshx/ollama-chat&Date)
 
 </div>
 
