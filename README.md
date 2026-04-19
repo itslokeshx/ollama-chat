@@ -15,7 +15,17 @@
 
 <br>
 
-[![Download Ollama Chat](https://img.shields.io/badge/Download-Ollama.Chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb)
+<div align="center">
+
+## 🚀 **Get Started Now**
+
+[![Download Ollama Chat](https://img.shields.io/badge/⬇_Download-Ollama.Chat_1.0.0_amd64.deb-2ea44f?style=for-the-badge&logo=linux&logoColor=white&labelColor=1a1a1a)](https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb)
+
+<p align="center">
+  <strong>v1.0.0</strong> • <strong>~3.5MB</strong> • <strong>Linux (amd64)</strong> • <strong>Free & Open Source</strong>
+</p>
+
+</div>
 
 <br>
 
@@ -93,48 +103,17 @@ This is what Ollama for Linux should have been from day one.
 
 ## ⬇ Installation
 
-### 🚀 One-click install (recommended)
-
 <div align="center">
 
 [![Download Ollama Chat](https://img.shields.io/badge/Download-Ollama.Chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb)
 
-**Latest version: v1.0.0** | **Size: <5MB** | **Platform: Linux (amd64)**
-
 </div>
 
-#### Quick Install Steps:
-
-1. **Download** the `.deb` file above
-2. **Double-click** the downloaded file in your file manager, or:
-3. **Install via terminal:**
-   ```bash
-   sudo dpkg -i Ollama.Chat_1.0.0_amd64.deb
-   ```
-4. **Launch** — Find "Ollama Chat" in your application menu
+```bash
+sudo dpkg -i Ollama.Chat_1.0.0_amd64.deb
+```
 
 > **⚠️ Prerequisite:** [Ollama](https://ollama.com) must be installed and running (`ollama serve`).
-
-#### Alternative Installation Methods
-
-**AppImage (no installation required):**
-
-```bash
-# Download and run directly
-wget https://github.com/itslokeshx/ollama-chat/releases/latest/download/ollama-chat_1.0.0_amd64.AppImage
-chmod +x ollama-chat_1.0.0_amd64.AppImage
-./ollama-chat_1.0.0_amd64.AppImage
-```
-
-**From Source (for developers):**
-
-```bash
-git clone https://github.com/itslokeshx/ollama-chat
-cd ollama-chat
-npm install
-npm run tauri build
-sudo dpkg -i src-tauri/target/release/bundle/deb/Ollama.Chat_1.0.0_amd64.deb
-```
 
 ---
 
