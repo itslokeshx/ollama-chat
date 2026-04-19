@@ -22,10 +22,21 @@ function saveAuthState(state: AuthState): void {
 
 export function useAuthStore(ollamaHost: string) {
   const [authState, setAuthState] = useState<AuthState>(loadAuthState);
+  const [isSupported, setIsSupported] = useState<boolean>(true);
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const checkAuth = useCallback(async () => {
+    if (!isSupported) return;
     try {
+      const res = await window.fetch(`${ollamaHost}/api/whoami`, { method: 'GET', signal: AbortSignal.timeout(5000) });
+      if (res.status === 404) {
+        setIsSupported(false); // Stop polling forever
+        const newState: AuthState = { status: 'signed-out' };
+        setAuthState(newState);
+        saveAuthState(newState);
+        return;
+      }
+      
       const user = await fetchWhoAmI(ollamaHost);
       if (user && (user.username || user.email)) {
         const newState: AuthState = {
@@ -41,12 +52,12 @@ export function useAuthStore(ollamaHost: string) {
         saveAuthState(newState);
       }
     } catch {
-      // If endpoint doesn't exist (404) or connection fails, treat as signed out
+      // Network error, keep polling
       const newState: AuthState = { status: 'signed-out' };
       setAuthState(newState);
       saveAuthState(newState);
     }
-  }, [ollamaHost]);
+  }, [ollamaHost, isSupported]);
 
   const signOut = useCallback(async () => {
     await apiSignOut(ollamaHost);
@@ -57,15 +68,16 @@ export function useAuthStore(ollamaHost: string) {
 
   // Check auth on mount and start polling
   useEffect(() => {
-    checkAuth();
-
-    pollTimerRef.current = setInterval(checkAuth, POLL_INTERVAL);
+    if (isSupported) {
+      checkAuth();
+      pollTimerRef.current = setInterval(checkAuth, POLL_INTERVAL);
+    }
     return () => {
       if (pollTimerRef.current) {
         clearInterval(pollTimerRef.current);
       }
     };
-  }, [checkAuth]);
+  }, [checkAuth, isSupported]);
 
   /**
    * Determine API configuration based on model and auth state.
