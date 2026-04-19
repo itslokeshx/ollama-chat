@@ -1,40 +1,60 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from "react";
 import {
-  Menu, Settings as SettingsIcon, Sun, Moon, Monitor,
-  ChevronDown, Terminal, Download, FileJson, Pencil,
-  AlertTriangle, RefreshCw,
-} from 'lucide-react';
-import type { OllamaModel, FileAttachment } from '@/lib/types';
-import { useChatStore } from '@/store/chat-store';
-import { fetchModels, streamChat, buildOllamaMessages } from '@/lib/ollama';
-import { buildMessageContent } from '@/lib/file-utils';
-import { Sidebar } from '@/components/chat/Sidebar';
-import { MessageBubble } from '@/components/chat/MessageBubble';
-import { InputArea } from '@/components/chat/InputArea';
-import { SystemPromptPanel } from '@/components/chat/SystemPromptPanel';
-import { SettingsModal } from '@/components/chat/SettingsModal';
-import { EmptyState } from '@/components/chat/EmptyState';
-import { LightboxModal } from '@/components/chat/LightboxModal';
+  Menu,
+  Settings as SettingsIcon,
+  Sun,
+  Moon,
+  Monitor,
+  ChevronDown,
+  Terminal,
+  Download,
+  FileJson,
+  Pencil,
+  AlertTriangle,
+  RefreshCw,
+} from "lucide-react";
+import type { OllamaModel, FileAttachment } from "@/lib/types";
+import { useChatStore } from "@/store/chat-store";
+import { fetchModels, streamChat, buildOllamaMessages } from "@/lib/ollama";
+import { CLOUD_MODELS } from "@/lib/cloud-models";
+import { buildMessageContent } from "@/lib/file-utils";
+import { Sidebar } from "@/components/chat/Sidebar";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { InputArea } from "@/components/chat/InputArea";
+import { SystemPromptPanel } from "@/components/chat/SystemPromptPanel";
+import { SettingsModal } from "@/components/chat/SettingsModal";
+import { EmptyState } from "@/components/chat/EmptyState";
+import { LightboxModal } from "@/components/chat/LightboxModal";
 
 export default function ChatPage() {
   const store = useChatStore();
-  const { conversations, activeId, setActiveId, activeConversation, settings, updateSettings } = store;
+  const {
+    conversations,
+    activeId,
+    setActiveId,
+    activeConversation,
+    settings,
+    updateSettings,
+  } = store;
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [systemPanelOpen, setSystemPanelOpen] = useState(false);
   const [models, setModels] = useState<OllamaModel[]>([]);
-  const [selectedModel, setSelectedModel] = useState('');
+  const [selectedModel, setSelectedModel] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMsgId, setStreamingMsgId] = useState<string | null>(null);
   const [ollamaOffline, setOllamaOffline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
-  const [titleDraft, setTitleDraft] = useState('');
+  const [titleDraft, setTitleDraft] = useState("");
   const [userScrolledUp, _setUserScrolledUp] = useState(false);
   const userScrolledUpRef = useRef(false);
-  const setUserScrolledUp = useCallback((val: boolean) => { userScrolledUpRef.current = val; _setUserScrolledUp(val); }, []);
+  const setUserScrolledUp = useCallback((val: boolean) => {
+    userScrolledUpRef.current = val;
+    _setUserScrolledUp(val);
+  }, []);
   const [pendingFiles, setPendingFiles] = useState<FileAttachment[]>([]);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -42,30 +62,52 @@ export default function ChatPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragCounter = useRef(0);
 
-  const isDark = settings.theme === 'dark' || (settings.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const isDark =
+    settings.theme === "dark" ||
+    (settings.theme === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
-      root.classList.add('dark');
+      root.classList.add("dark");
     } else {
-      root.classList.remove('dark');
+      root.classList.remove("dark");
     }
   }, [isDark]);
 
-  const fontSizeClass = settings.fontSize === 'sm' ? 'text-[13px]' : settings.fontSize === 'lg' ? 'text-[17px]' : 'text-[15px]';
+  const fontSizeClass =
+    settings.fontSize === "sm"
+      ? "text-[13px]"
+      : settings.fontSize === "lg"
+        ? "text-[17px]"
+        : "text-[15px]";
 
   const loadModels = useCallback(async () => {
     try {
       const data = await fetchModels(settings.ollamaHost);
       const mods = (data.models ?? []) as OllamaModel[];
-      setModels(mods);
+
+      // Combine local and cloud models, deduplicating by name
+      const allModels = [...mods];
+      for (const cm of CLOUD_MODELS) {
+        if (!allModels.find((m) => m.name === cm.name)) {
+          allModels.push(cm);
+        }
+      }
+
+      setModels(allModels);
       setOllamaOffline(false);
-      if (!selectedModel && mods.length > 0) {
-        setSelectedModel(mods[0].name);
+      if (!selectedModel && allModels.length > 0) {
+        setSelectedModel(allModels[0].name);
       }
     } catch {
       setOllamaOffline(true);
+      // Still show cloud models even if local Ollama is offline
+      setModels(CLOUD_MODELS);
+      if (!selectedModel && CLOUD_MODELS.length > 0) {
+        setSelectedModel(CLOUD_MODELS[0].name);
+      }
     }
   }, [settings.ollamaHost, selectedModel]);
 
@@ -79,11 +121,14 @@ export default function ChatPage() {
     }
   }, [activeConversation?.id]);
 
-  const scrollToBottom = useCallback((force = false) => {
-    if (!settings.autoScroll && !force) return;
-    if (userScrolledUp && !force) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [settings.autoScroll, userScrolledUp]);
+  const scrollToBottom = useCallback(
+    (force = false) => {
+      if (!settings.autoScroll && !force) return;
+      if (userScrolledUp && !force) return;
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    },
+    [settings.autoScroll, userScrolledUp],
+  );
 
   useEffect(() => {
     scrollToBottom();
@@ -93,89 +138,132 @@ export default function ChatPage() {
     const el = scrollContainerRef.current;
     if (!el) return;
     const threshold = 100;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    const atBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
     setUserScrolledUp(!atBottom);
   }, []);
 
   const handleNewChat = useCallback(() => {
-    store.createConversation(selectedModel || models[0]?.name || 'llama3.2', '');
+    store.createConversation(
+      selectedModel || models[0]?.name || "llama3.2",
+      "",
+    );
     setUserScrolledUp(false);
   }, [store, selectedModel, models]);
 
-  const handleSelectConversation = useCallback((id: string) => {
-    setActiveId(id);
-    setUserScrolledUp(false);
-  }, [setActiveId]);
+  const handleSelectConversation = useCallback(
+    (id: string) => {
+      setActiveId(id);
+      setUserScrolledUp(false);
+    },
+    [setActiveId],
+  );
 
-  const handleSend = useCallback(async (text: string, attachments: FileAttachment[]) => {
-    if (isStreaming) return;
+  const handleSend = useCallback(
+    async (text: string, attachments: FileAttachment[]) => {
+      if (isStreaming) return;
 
-    let convId = activeId;
-    if (!convId) {
-      convId = store.createConversation(selectedModel, activeConversation?.systemPrompt ?? '');
-    }
+      let convId = activeId;
+      if (!convId) {
+        convId = store.createConversation(
+          selectedModel,
+          activeConversation?.systemPrompt ?? "",
+        );
+      }
 
-    const { content, images } = buildMessageContent(text, attachments);
+      const { content, images } = buildMessageContent(text, attachments);
 
-    store.addMessage(convId, {
-      role: 'user',
-      content,
-      images: images.length > 0 ? images : undefined,
-      attachments,
-    });
+      store.addMessage(convId, {
+        role: "user",
+        content,
+        images: images.length > 0 ? images : undefined,
+        attachments,
+      });
 
-    const assistantMsgId = store.addMessage(convId, { role: 'assistant', content: '' });
-    setStreamingMsgId(assistantMsgId);
-    setIsStreaming(true);
-    setUserScrolledUp(false);
+      const assistantMsgId = store.addMessage(convId, {
+        role: "assistant",
+        content: "",
+      });
+      setStreamingMsgId(assistantMsgId);
+      setIsStreaming(true);
+      setUserScrolledUp(false);
 
-    const conv = conversations.find((c) => c.id === convId);
+      const conv = conversations.find((c) => c.id === convId);
 
-    const allMessages = [
-      ...(conv ? conv.messages : []).filter((m) => m.id !== assistantMsgId),
-      { role: 'user' as const, content, images: images.length > 0 ? images : undefined, id: '', createdAt: 0 },
-    ];
+      const allMessages = [
+        ...(conv ? conv.messages : []).filter((m) => m.id !== assistantMsgId),
+        {
+          role: "user" as const,
+          content,
+          images: images.length > 0 ? images : undefined,
+          id: "",
+          createdAt: 0,
+        },
+      ];
 
-    const ollamaMessages = buildOllamaMessages(allMessages, activeConversation?.systemPrompt ?? (conv ? conv.systemPrompt : "") ?? '');
+      const ollamaMessages = buildOllamaMessages(
+        allMessages,
+        activeConversation?.systemPrompt ??
+          (conv ? conv.systemPrompt : "") ??
+          "",
+      );
 
-    abortRef.current = new AbortController();
+      abortRef.current = new AbortController();
 
-    let accum = '';
+      let accum = "";
 
-    await streamChat(
-      settings.ollamaHost,
+      await streamChat(
+        settings.ollamaHost,
+        selectedModel,
+        ollamaMessages,
+        {
+          temperature: settings.temperature,
+          top_p: settings.topP,
+          top_k: settings.topK,
+          num_predict: settings.maxTokens,
+          keep_alive: settings.keepAlive,
+        },
+        {
+          onToken: (token) => {
+            accum += token;
+            store.updateMessage(convId!, assistantMsgId, { content: accum });
+            if (!userScrolledUpRef.current && settings.autoScroll) {
+              messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+            }
+          },
+          onDone: () => {
+            setIsStreaming(false);
+            setStreamingMsgId(null);
+          },
+          onError: (err) => {
+            const isModelNotFound =
+              err.message.includes("not found") &&
+              err.message.includes("model");
+            const fallbackMsg = isModelNotFound
+              ? `Error: ${err.message}\n\n**This model is not downloaded locally yet.**\nTo run it, open your terminal and run:\n\`\`\`bash\nollama run ${selectedModel}\n\`\`\``
+              : `Error: ${err.message}\n\nMake sure Ollama is running with:\n\`\`\`bash\nollama serve\n\`\`\``;
+
+            store.updateMessage(convId!, assistantMsgId, {
+              content: fallbackMsg,
+            });
+            setIsStreaming(false);
+            setStreamingMsgId(null);
+          },
+        },
+        abortRef.current.signal,
+      );
+    },
+    [
+      activeId,
+      activeConversation,
+      conversations,
+      isStreaming,
       selectedModel,
-      ollamaMessages,
-      {
-        temperature: settings.temperature,
-        top_p: settings.topP,
-        top_k: settings.topK,
-        num_predict: settings.maxTokens,
-        keep_alive: settings.keepAlive,
-      },
-      {
-        onToken: (token) => {
-          accum += token;
-          store.updateMessage(convId!, assistantMsgId, { content: accum });
-          if (!userScrolledUpRef.current && settings.autoScroll) {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-          }
-        },
-        onDone: () => {
-          setIsStreaming(false);
-          setStreamingMsgId(null);
-        },
-        onError: (err) => {
-          store.updateMessage(convId!, assistantMsgId, {
-            content: `Error: ${err.message}\n\nMake sure Ollama is running with:\n\`\`\`\nollama serve\n\`\`\``,
-          });
-          setIsStreaming(false);
-          setStreamingMsgId(null);
-        },
-      },
-      abortRef.current.signal
-    );
-  }, [activeId, activeConversation, conversations, isStreaming, selectedModel, settings, store, userScrolledUp]);
+      settings,
+      store,
+      userScrolledUp,
+    ],
+  );
 
   const handleStop = useCallback(() => {
     abortRef.current?.abort();
@@ -183,23 +271,29 @@ export default function ChatPage() {
     setStreamingMsgId(null);
   }, []);
 
-  const handleRegenerate = useCallback((msgId: string) => {
-    if (!activeConversation || isStreaming) return;
-    const idx = activeConversation.messages.findIndex((m) => m.id === msgId);
-    if (idx < 1) return;
-    const userMsg = activeConversation.messages[idx - 1];
-    store.deleteMessagesAfter(activeConversation.id, userMsg.id);
-    const { content, images } = buildMessageContent(userMsg.content, []);
-    setTimeout(() => {
-      handleSend(content, []);
-    }, 50);
-  }, [activeConversation, isStreaming, store, handleSend]);
+  const handleRegenerate = useCallback(
+    (msgId: string) => {
+      if (!activeConversation || isStreaming) return;
+      const idx = activeConversation.messages.findIndex((m) => m.id === msgId);
+      if (idx < 1) return;
+      const userMsg = activeConversation.messages[idx - 1];
+      store.deleteMessagesAfter(activeConversation.id, userMsg.id);
+      const { content, images } = buildMessageContent(userMsg.content, []);
+      setTimeout(() => {
+        handleSend(content, []);
+      }, 50);
+    },
+    [activeConversation, isStreaming, store, handleSend],
+  );
 
-  const handleEditMessage = useCallback((msgId: string, newContent: string) => {
-    if (!activeConversation) return;
-    store.deleteMessagesAfter(activeConversation.id, msgId);
-    setTimeout(() => handleSend(newContent, []), 50);
-  }, [activeConversation, store, handleSend]);
+  const handleEditMessage = useCallback(
+    (msgId: string, newContent: string) => {
+      if (!activeConversation) return;
+      store.deleteMessagesAfter(activeConversation.id, msgId);
+      setTimeout(() => handleSend(newContent, []), 50);
+    },
+    [activeConversation, store, handleSend],
+  );
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -219,7 +313,7 @@ export default function ChatPage() {
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      const { processFile } = await import('@/lib/file-utils');
+      const { processFile } = await import("@/lib/file-utils");
       const processed = await Promise.all(files.map(processFile));
       setPendingFiles((prev) => [...prev, ...processed]);
     }
@@ -233,37 +327,53 @@ export default function ChatPage() {
 
   const handleTitleSave = () => {
     if (activeConversation && titleDraft.trim()) {
-      store.updateConversation(activeConversation.id, { title: titleDraft.trim() });
+      store.updateConversation(activeConversation.id, {
+        title: titleDraft.trim(),
+      });
     }
     setEditingTitle(false);
   };
 
   const cycleTheme = () => {
-    const next = settings.theme === 'light' ? 'dark' : settings.theme === 'dark' ? 'system' : 'light';
+    const next =
+      settings.theme === "light"
+        ? "dark"
+        : settings.theme === "dark"
+          ? "system"
+          : "light";
     updateSettings({ theme: next });
   };
 
-  const ThemeIcon = settings.theme === 'dark' ? Moon : settings.theme === 'light' ? Sun : Monitor;
+  const ThemeIcon =
+    settings.theme === "dark"
+      ? Moon
+      : settings.theme === "light"
+        ? Sun
+        : Monitor;
 
   const messages = activeConversation?.messages ?? [];
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault(); handleNewChat();
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        handleNewChat();
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-        e.preventDefault(); setSettingsOpen(true);
+      if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+        e.preventDefault();
+        setSettingsOpen(true);
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-        e.preventDefault(); setSidebarOpen((v) => !v);
+      if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+        e.preventDefault();
+        setSidebarOpen((v) => !v);
       }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
-        e.preventDefault(); cycleTheme();
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "L") {
+        e.preventDefault();
+        cycleTheme();
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [handleNewChat, cycleTheme]);
 
   return (
@@ -278,8 +388,12 @@ export default function ChatPage() {
       {isDragging && (
         <div className="drag-overlay">
           <div className="text-center">
-            <div className="text-2xl font-semibold text-primary mb-2">Drop files to attach</div>
-            <div className="text-sm text-muted-foreground">Images, text files, and PDFs supported</div>
+            <div className="text-2xl font-semibold text-primary mb-2">
+              Drop files to attach
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Images, text files, and PDFs supported
+            </div>
           </div>
         </div>
       )}
@@ -287,10 +401,13 @@ export default function ChatPage() {
       <div
         className="flex items-center h-9 px-3 bg-sidebar border-b border-sidebar-border shrink-0"
         data-tauri-drag-region
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
         data-testid="titlebar"
       >
-        <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <div
+          className="flex items-center gap-2"
+          style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+        >
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             className="p-1.5 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
@@ -309,11 +426,11 @@ export default function ChatPage() {
               onChange={(e) => setTitleDraft(e.target.value)}
               onBlur={handleTitleSave}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleTitleSave();
-                if (e.key === 'Escape') setEditingTitle(false);
+                if (e.key === "Enter") handleTitleSave();
+                if (e.key === "Escape") setEditingTitle(false);
               }}
               className="text-sm font-medium text-foreground bg-transparent border-b border-primary outline-none text-center min-w-[120px] max-w-xs"
-              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
               data-testid="input-title"
             />
           ) : (
@@ -321,15 +438,18 @@ export default function ChatPage() {
               onDoubleClick={handleTitleEdit}
               className="text-sm font-medium text-foreground truncate max-w-xs hover:text-foreground/80 transition-colors"
               title="Double-click to edit title"
-              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+              style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
               data-testid="text-conversation-title"
             >
-              {activeConversation?.title ?? 'Ollama Chat'}
+              {activeConversation?.title ?? "Ollama Chat"}
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-1" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <div
+          className="flex items-center gap-1"
+          style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+        >
           {activeConversation && (
             <div className="relative group">
               <button
@@ -341,14 +461,14 @@ export default function ChatPage() {
               </button>
               <div className="absolute right-0 top-full mt-1 w-40 bg-popover border border-popover-border rounded-xl shadow-lg py-1 z-50 hidden group-hover:block">
                 <button
-                  onClick={() => store.exportCurrentConversation('md')}
+                  onClick={() => store.exportCurrentConversation("md")}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-accent text-foreground transition-colors"
                   data-testid="button-export-md"
                 >
                   <FileJson size={13} /> Export as Markdown
                 </button>
                 <button
-                  onClick={() => store.exportCurrentConversation('json')}
+                  onClick={() => store.exportCurrentConversation("json")}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-accent text-foreground transition-colors"
                   data-testid="button-export-json"
                 >
@@ -360,7 +480,7 @@ export default function ChatPage() {
 
           <button
             onClick={() => setSystemPanelOpen((v) => !v)}
-            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${systemPanelOpen || activeConversation?.systemPrompt ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${systemPanelOpen || activeConversation?.systemPrompt ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"}`}
             title="System prompt"
             data-testid="button-toggle-system"
           >
@@ -406,7 +526,10 @@ export default function ChatPage() {
             <div className="flex items-center gap-3 px-4 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-sm">
               <AlertTriangle size={15} />
               <span>
-                Ollama is not running. Start it with <code className="font-mono text-xs bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded">ollama serve</code>
+                Ollama is not running. Start it with{" "}
+                <code className="font-mono text-xs bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded">
+                  ollama serve
+                </code>
               </span>
               <button
                 onClick={loadModels}
@@ -422,7 +545,11 @@ export default function ChatPage() {
             <SystemPromptPanel
               open={systemPanelOpen}
               value={activeConversation.systemPrompt}
-              onChange={(v) => store.updateConversation(activeConversation.id, { systemPrompt: v })}
+              onChange={(v) =>
+                store.updateConversation(activeConversation.id, {
+                  systemPrompt: v,
+                })
+              }
               onClose={() => setSystemPanelOpen(false)}
             />
           )}
@@ -434,12 +561,17 @@ export default function ChatPage() {
             data-testid="messages-container"
           >
             {messages.length === 0 ? (
-              <EmptyState onSuggestion={(text) => {
-                if (!activeId) {
-                  store.createConversation(selectedModel || models[0]?.name || '', '');
-                }
-                setTimeout(() => handleSend(text, []), 50);
-              }} />
+              <EmptyState
+                onSuggestion={(text) => {
+                  if (!activeId) {
+                    store.createConversation(
+                      selectedModel || models[0]?.name || "",
+                      "",
+                    );
+                  }
+                  setTimeout(() => handleSend(text, []), 50);
+                }}
+              />
             ) : (
               <div className="flex flex-col gap-3 max-w-3xl mx-auto w-full">
                 {messages.map((msg) => (
@@ -447,9 +579,24 @@ export default function ChatPage() {
                     key={msg.id}
                     message={msg}
                     isStreaming={isStreaming && msg.id === streamingMsgId}
-                    onRegenerate={msg.role === 'assistant' ? () => handleRegenerate(msg.id) : undefined}
-                    onEdit={msg.role === 'user' ? (newContent) => handleEditMessage(msg.id, newContent) : undefined}
-                    onFeedback={msg.role === 'assistant' ? (f) => store.updateMessage(activeId!, msg.id, { feedback: f }) : undefined}
+                    onRegenerate={
+                      msg.role === "assistant"
+                        ? () => handleRegenerate(msg.id)
+                        : undefined
+                    }
+                    onEdit={
+                      msg.role === "user"
+                        ? (newContent) => handleEditMessage(msg.id, newContent)
+                        : undefined
+                    }
+                    onFeedback={
+                      msg.role === "assistant"
+                        ? (f) =>
+                            store.updateMessage(activeId!, msg.id, {
+                              feedback: f,
+                            })
+                        : undefined
+                    }
                     onImageClick={setLightboxSrc}
                   />
                 ))}
@@ -461,7 +608,10 @@ export default function ChatPage() {
           {userScrolledUp && messages.length > 0 && (
             <div className="flex justify-center pb-2">
               <button
-                onClick={() => { setUserScrolledUp(false); scrollToBottom(true); }}
+                onClick={() => {
+                  setUserScrolledUp(false);
+                  scrollToBottom(true);
+                }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shadow-sm"
                 data-testid="button-scroll-to-bottom"
               >
