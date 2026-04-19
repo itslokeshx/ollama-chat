@@ -4,7 +4,7 @@
 
 # Ollama Chat
 
-**A native Linux desktop UI for Ollama — under 5MB, no Docker, no Node.js, no nonsense.**
+**A native Linux desktop UI for Ollama — ~3.5MB, no Docker, no Node.js, no nonsense.**
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Tauri 2.0](https://img.shields.io/badge/Tauri-2.0-orange?logo=tauri)](https://tauri.app)
@@ -15,7 +15,7 @@
 
 <br>
 
-[![Download Ollama Chat](https://img.shields.io/badge/Download-ollama--chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/latest/download/ollama-chat_1.0.0_amd64.deb)
+[![Download Ollama Chat](https://img.shields.io/badge/Download-Ollama.Chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb)
 
 <br>
 
@@ -97,7 +97,7 @@ This is what Ollama for Linux should have been from day one.
 
 <div align="center">
 
-[![Download Ollama Chat](https://img.shields.io/badge/Download-ollama--chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/latest/download/ollama-chat_1.0.0_amd64.deb)
+[![Download Ollama Chat](https://img.shields.io/badge/Download-Ollama.Chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb)
 
 **Latest version: v1.0.0** | **Size: <5MB** | **Platform: Linux (amd64)**
 
@@ -109,7 +109,7 @@ This is what Ollama for Linux should have been from day one.
 2. **Double-click** the downloaded file in your file manager, or:
 3. **Install via terminal:**
    ```bash
-   sudo dpkg -i ollama-chat_1.0.0_amd64.deb
+   sudo dpkg -i Ollama.Chat_1.0.0_amd64.deb
    ```
 4. **Launch** — Find "Ollama Chat" in your application menu
 
@@ -133,7 +133,7 @@ git clone https://github.com/itslokeshx/ollama-chat
 cd ollama-chat
 npm install
 npm run tauri build
-sudo dpkg -i src-tauri/target/release/bundle/deb/ollama-chat_1.0.0_amd64.deb
+sudo dpkg -i src-tauri/target/release/bundle/deb/Ollama.Chat_1.0.0_amd64.deb
 ```
 
 ---
@@ -271,25 +271,8 @@ npm run tauri dev
 npm run tauri build
 
 # Install the built package
-sudo dpkg -i src-tauri/target/release/bundle/deb/ollama-chat_1.0.0_amd64.deb
+sudo dpkg -i src-tauri/target/release/bundle/deb/Ollama.Chat_1.0.0_amd64.deb
 ```
-
-### Build Artifacts
-
-- **`.deb` package** — Native Linux installer
-- **`.AppImage`** — Portable Linux application
-- **Source code** — For custom modifications
-
----
-
-## 🔧 System Requirements
-
-| Component   | Minimum                    | Recommended                |
-| ----------- | -------------------------- | -------------------------- |
-| **OS**      | Ubuntu 18.04+ / Debian 10+ | Ubuntu 22.04+ / Debian 12+ |
-| **RAM**     | 4GB                        | 8GB+                       |
-| **Storage** | 2GB free                   | 10GB+ (for models)         |
-| **Display** | 1280x720                   | 1920x1080+                 |
 
 ---
 
@@ -358,7 +341,7 @@ SOFTWARE.
 
 <div align="center">
 
-[![Download Ollama Chat](https://img.shields.io/badge/Download-ollama--chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/latest/download/ollama-chat_1.0.0_amd64.deb)
+[![Download Ollama Chat](https://img.shields.io/badge/Download-Ollama.Chat_1.0.0_amd64.deb-blue?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/itslokeshx/ollama-chat/releases/download/v1.0.0/Ollama.Chat_1.0.0_amd64.deb)
 
 **Built for Linux users who just want a proper UI for their local AI.**
 
@@ -375,4 +358,3 @@ SOFTWARE.
 </div>
 
 </div>
-```
