@@ -110,26 +110,33 @@ export default function ChatPage() {
 
       setModels(allModels);
       setOllamaOffline(false);
-      if (!selectedModel && allModels.length > 0) {
-        setSelectedModel(allModels[0].name);
-      }
+      // Use functional update to avoid dependency on selectedModel
+      setSelectedModel((prev) => {
+        if (!prev && allModels.length > 0) {
+          return allModels[0].name;
+        }
+        return prev;
+      });
     } catch {
       setOllamaOffline(true);
       // Still show cloud models even if local Ollama is offline
       setModels(CLOUD_MODELS);
-      if (!selectedModel && CLOUD_MODELS.length > 0) {
-        setSelectedModel(CLOUD_MODELS[0].name);
-      }
+      setSelectedModel((prev) => {
+        if (!prev && CLOUD_MODELS.length > 0) {
+          return CLOUD_MODELS[0].name;
+        }
+        return prev;
+      });
     }
-  }, [settings.ollamaHost, selectedModel]);
+  }, [settings.ollamaHost]);
 
   useEffect(() => {
     loadModels();
   }, [loadModels]);
 
   useEffect(() => {
-    if (activeConversation) {
-      setSelectedModel(activeConversation.model || selectedModel);
+    if (activeConversation?.model) {
+      setSelectedModel(activeConversation.model);
     }
   }, [activeConversation?.id]);
 
