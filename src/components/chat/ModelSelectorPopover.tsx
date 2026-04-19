@@ -23,6 +23,7 @@ function getProviderPrefix(family: string = '', name: string = '') {
   const map: Record<string, string> = {
     llama: 'Meta',
     gemma: 'Google',
+    gemini: 'Google',
     qwen: 'Alibaba',
     qwennext: 'Alibaba',
     mistral: 'Mistral',

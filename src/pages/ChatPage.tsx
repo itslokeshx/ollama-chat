@@ -100,12 +100,10 @@ export default function ChatPage() {
       const data = await fetchModels(settings.ollamaHost);
       const mods = (data.models ?? []) as OllamaModel[];
 
-      // Combine local and cloud models, deduplicating by base name
+      // Combine local and cloud models, deduplicating by exact name
       const allModels = [...mods];
       for (const cm of CLOUD_MODELS) {
-        if (
-          !allModels.find((m) => m.name.split(":")[0] === cm.name.split(":")[0])
-        ) {
+        if (!allModels.find((m) => m.name === cm.name)) {
           allModels.push(cm);
         }
       }
