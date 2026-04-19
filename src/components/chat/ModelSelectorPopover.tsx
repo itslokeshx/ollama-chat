@@ -123,12 +123,7 @@ function ModelRow({
           )}
         </div>
 
-        {/* Param size badge */}
-        {paramSize && (
-          <span className="px-1.5 py-[1px] rounded bg-muted text-muted-foreground text-[10px] font-medium shrink-0 uppercase">
-            {paramSize}
-          </span>
-        )}
+
 
         {/* Capability badges */}
         <div className="flex items-center gap-1 shrink-0">
@@ -146,17 +141,7 @@ function ModelRow({
         )}
       </div>
 
-      {/* Micro row: quant + family */}
-      {(quant || model.details?.family) && (
-        <div className="flex items-center gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          {quant && (
-            <span className="text-[10px] text-muted-foreground">{quant}</span>
-          )}
-          {model.details?.family && (
-            <span className="text-[10px] text-muted-foreground">{model.details.family}</span>
-          )}
-        </div>
-      )}
+
     </button>
   );
 }

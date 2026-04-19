@@ -117,21 +117,6 @@ export function ModelInfoPanel({
           <div className="space-y-6">
             {/* Grid properties */}
             <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs">
-              <div className="text-muted-foreground font-medium">Family</div>
-              <div className="text-right truncate text-foreground">{family}</div>
-
-              <div className="text-muted-foreground font-medium">Params</div>
-              <div className="text-right uppercase text-foreground">{params}</div>
-
-              <div className="text-muted-foreground font-medium">Context</div>
-              <div className="text-right text-foreground">{Number(ctxLength).toLocaleString()}</div>
-
-              <div className="text-muted-foreground font-medium">Quant</div>
-              <div className="text-right uppercase text-foreground truncate" title={quant}>{quant}</div>
-
-              <div className="text-muted-foreground font-medium">Size</div>
-              <div className="text-right text-foreground">{sizeStr}</div>
-
               <div className="text-muted-foreground font-medium">Modified</div>
               <div className="text-right truncate text-foreground" title={modifiedStr}>{modifiedStr}</div>
             </div>
